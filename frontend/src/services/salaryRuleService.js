@@ -1,0 +1,1 @@
+import resource from "./resourceService"; const x=resource("/salary-rules"); export const getSalaryRules=x.list; export const createSalaryRule=x.create; export const updateSalaryRule=x.update; export const deleteSalaryRule=x.remove;

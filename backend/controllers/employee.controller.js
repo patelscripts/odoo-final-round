@@ -1,8 +1,25 @@
 const Employee = require("../models/Employee");
 
+const parseBankDetails = (value) => {
+  if (!value) return undefined;
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return { bankName: value };
+    }
+  }
+  return value;
+};
+
 exports.createEmployee = async (req, res) => {
   try {
-    const employee = await Employee.create(req.body);
+    const employee = await Employee.create({
+      ...req.body,
+      bankDetails: parseBankDetails(req.body.bankDetails),
+      manager: req.body.manager || undefined,
+      workingSchedule: req.body.workingSchedule || undefined,
+    });
     res.status(201).json(employee);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -34,7 +51,13 @@ exports.getEmployeeById = async (req, res) => {
 
 exports.updateEmployee = async (req, res) => {
   try {
-    const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, {
+    const payload = {
+      ...req.body,
+      bankDetails: parseBankDetails(req.body.bankDetails) ?? req.body.bankDetails,
+      manager: req.body.manager || undefined,
+      workingSchedule: req.body.workingSchedule || undefined,
+    };
+    const employee = await Employee.findByIdAndUpdate(req.params.id, payload, {
       new: true,
       runValidators: true,
     });

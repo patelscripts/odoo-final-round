@@ -1,0 +1,1 @@
+import resource from "./resourceService"; const x=resource("/schedules"); export const getSchedules=x.list; export const createSchedule=x.create; export const updateSchedule=x.update; export const deleteSchedule=x.remove;

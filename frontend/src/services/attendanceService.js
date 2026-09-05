@@ -1,0 +1,1 @@
+import resource from "./resourceService"; const x=resource("/attendance"); export const getAttendance=x.list; export const createAttendance=x.create; export const updateAttendance=x.update; export const deleteAttendance=x.remove;

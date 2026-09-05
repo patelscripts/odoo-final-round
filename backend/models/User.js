@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     },
     employee: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
     isActive: { type: Boolean, default: true },
+    isApproved:{type: Boolean, default: false},
   },
   { timestamps: true }
 );
@@ -20,7 +21,7 @@ const userSchema = new mongoose.Schema(
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
-  next();
+  // next();
 });
 
 userSchema.methods.comparePassword = function (candidate) {

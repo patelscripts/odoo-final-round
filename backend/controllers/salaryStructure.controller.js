@@ -1,8 +1,20 @@
 const SalaryStructure = require("../models/SalaryStructure");
 
+const parseRules = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    return value.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+};
+
 exports.createStructure = async (req, res) => {
   try {
-    const structure = await SalaryStructure.create(req.body);
+    const structure = await SalaryStructure.create({
+      ...req.body,
+      salaryRules: parseRules(req.body.salaryRules),
+    });
     res.status(201).json(structure);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -30,7 +42,11 @@ exports.getStructureById = async (req, res) => {
 
 exports.updateStructure = async (req, res) => {
   try {
-    const structure = await SalaryStructure.findByIdAndUpdate(req.params.id, req.body, {
+    const payload = {
+      ...req.body,
+      salaryRules: req.body.salaryRules !== undefined ? parseRules(req.body.salaryRules) : undefined,
+    };
+    const structure = await SalaryStructure.findByIdAndUpdate(req.params.id, payload, {
       new: true,
       runValidators: true,
     });

@@ -1,11 +1,25 @@
 const WorkingSchedule = require("../models/WorkingSchedule");
 
+const parsePattern = (pattern) => {
+  if (!pattern) return [];
+  if (typeof pattern === "string") {
+    try {
+      return JSON.parse(pattern);
+    } catch {
+      return [];
+    }
+  }
+  return Array.isArray(pattern) ? pattern : [];
+};
+
 const calcWeeklyHours = (pattern) => {
   let total = 0;
-  pattern.forEach((day) => {
-    const [sh, sm] = day.startTime.split(":").map(Number);
-    const [eh, em] = day.endTime.split(":").map(Number);
-    const minutes = (eh * 60 + em) - (sh * 60 + sm) - (day.breakMinutes || 0);
+  parsePattern(pattern).forEach((day) => {
+    if (!day?.startTime || !day?.endTime) return;
+    const [sh, sm] = String(day.startTime).split(":").map(Number);
+    const [eh, em] = String(day.endTime).split(":").map(Number);
+    if ([sh, sm, eh, em].some(Number.isNaN)) return;
+    const minutes = eh * 60 + em - (sh * 60 + sm) - (day.breakMinutes || 0);
     total += Math.max(minutes, 0);
   });
   return +(total / 60).toFixed(2);
@@ -13,8 +27,9 @@ const calcWeeklyHours = (pattern) => {
 
 exports.createSchedule = async (req, res) => {
   try {
-    const totalWeeklyHours = calcWeeklyHours(req.body.pattern || []);
-    const schedule = await WorkingSchedule.create({ ...req.body, totalWeeklyHours });
+    const pattern = parsePattern(req.body.pattern).filter((d) => d.startTime && d.endTime);
+    const totalWeeklyHours = calcWeeklyHours(pattern);
+    const schedule = await WorkingSchedule.create({ ...req.body, pattern, totalWeeklyHours });
     res.status(201).json(schedule);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -42,10 +57,9 @@ exports.getScheduleById = async (req, res) => {
 
 exports.updateSchedule = async (req, res) => {
   try {
-    const totalWeeklyHours = req.body.pattern
-      ? calcWeeklyHours(req.body.pattern)
-      : undefined;
-    const update = totalWeeklyHours !== undefined ? { ...req.body, totalWeeklyHours } : req.body;
+    const pattern = req.body.pattern !== undefined ? parsePattern(req.body.pattern).filter((d) => d.startTime && d.endTime) : undefined;
+    const totalWeeklyHours = pattern ? calcWeeklyHours(pattern) : undefined;
+    const update = totalWeeklyHours !== undefined ? { ...req.body, pattern, totalWeeklyHours } : req.body;
     const schedule = await WorkingSchedule.findByIdAndUpdate(req.params.id, update, {
       new: true,
       runValidators: true,

@@ -87,7 +87,11 @@ exports.updateAllocation = async (req, res) => {
 // ---- Requests ----
 exports.createRequest = async (req, res) => {
   try {
-    const request = await TimeOffRequest.create(req.body);
+    const { startDate, endDate, duration } = req.body;
+    const days =
+      duration ||
+      Math.max(1, Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000) + 1);
+    const request = await TimeOffRequest.create({ ...req.body, duration: days });
     res.status(201).json(request);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -112,7 +116,7 @@ exports.getRequests = async (req, res) => {
 // Approve/Refuse — core business logic: deduct from allocation
 exports.decideRequest = async (req, res) => {
   try {
-    const { decision } = req.body; // "approved" | "refused"
+    const decision = req.body.decision || req.body.status;
     if (!["approved", "refused"].includes(decision)) {
       return res.status(400).json({ message: "Invalid decision" });
     }

@@ -39,7 +39,8 @@ exports.getPayrunById = async (req, res) => {
       .populate("salaryStructure")
       .populate("employees", "name department");
     if (!payrun) return res.status(404).json({ message: "Payrun not found" });
-    res.json(payrun);
+    const payslips = await Payslip.find({ payrun: payrun._id }).populate("employee", "name");
+    res.json({ ...payrun.toObject(), payslips });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
