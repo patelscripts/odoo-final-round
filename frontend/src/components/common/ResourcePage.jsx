@@ -216,8 +216,8 @@ function FormModal({ title, fields, initial, onClose, onSubmit }) {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-ink/30 z-20 flex items-end sm:items-center justify-center p-0 sm:p-5">
-      <div className="card w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-lg">
+    <div className="fixed inset-0 bg-ink/30 z-20 flex items-start sm:items-center justify-center p-4 sm:p-5">
+      <div className="card w-full max-w-2xl max-h-[calc(100vh-2rem)] sm:max-h-[92vh] overflow-y-auto rounded-lg mt-4 sm:mt-0">
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-xl sm:text-2xl">{title}</h2>
           <button onClick={onClose} className="text-ink-muted">

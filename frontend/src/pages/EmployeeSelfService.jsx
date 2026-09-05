@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { getEmployee, getEmployeeAttendance, getEmployeeTimeOff } from "../services/employeeService";
-import { getPayslips } from "../services/payrollService";
+import { getPayslips, printPayslip } from "../services/payrollService";
 import { createRequest, getTypes } from "../services/timeoffService";
 import { formatDate } from "../utils/dateHelpers";
 import formatCurrency from "../utils/formatCurrency";
 import PageHeader from "../components/common/PageHeader";
-import { Briefcase, Clock, CalendarCheck, Wallet } from "lucide-react";
+import { Briefcase, Clock, CalendarCheck, Wallet, Printer } from "lucide-react";
 
 const sectionDetails = {
   dashboard: { title: "My Dashboard", description: "A quick overview of your work." },
@@ -101,6 +101,17 @@ export default function EmployeeSelfService({ section }) {
     }
   };
 
+  const handlePrintPayslip = async (id) => {
+    try {
+      const response = await printPayslip(id);
+      const url = URL.createObjectURL(response.data);
+      window.open(url, "_blank", "noopener,noreferrer");
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not print payslip.");
+    }
+  };
+
   const presentDays = attendance.filter((a) => a.status === "present").length;
   const pendingRequests = timeOff.filter((t) => t.status === "pending").length;
   const approvedRequests = timeOff.filter((t) => t.status === "approved").length;
@@ -126,6 +137,17 @@ export default function EmployeeSelfService({ section }) {
               icon={Wallet}
               label="Latest net salary"
               value={latestPayslip ? formatCurrency(latestPayslip.netSalary) : "-"}
+              action={latestPayslip ? (
+                <button
+                  type="button"
+                  className="btn-secondary p-2! mt-3"
+                  onClick={() => handlePrintPayslip(latestPayslip._id)}
+                  title="Print latest payslip"
+                  aria-label="Print latest payslip"
+                >
+                  <Printer size={16} />
+                </button>
+              ) : null}
             />
           </div>
 
@@ -248,13 +270,28 @@ export default function EmployeeSelfService({ section }) {
       )}
 
       {!error && section === "payslips" && (
-        <RecordList items={items} empty="No payslips found." render={(item) => `${formatDate(item.periodStart)} · ${formatCurrency(item.netSalary)}`} />
+        <RecordList
+          items={items}
+          empty="No payslips found."
+          render={(item) => `${formatDate(item.periodStart)} · ${formatCurrency(item.netSalary)}`}
+          action={(item) => (
+            <button
+              type="button"
+              className="btn-secondary p-2!"
+              onClick={() => handlePrintPayslip(item._id)}
+              title="Print payslip"
+              aria-label={`Print payslip for ${formatDate(item.periodStart)}`}
+            >
+              <Printer size={16} />
+            </button>
+          )}
+        />
       )}
     </div>
   );
 }
 
-function StatCard({ icon: Icon, label, value, sub }) {
+function StatCard({ icon: Icon, label, value, sub, action }) {
   return (
     <div className="card">
       <div className="w-10 h-10 rounded-lg bg-primary-light flex items-center justify-center mb-4">
@@ -263,6 +300,7 @@ function StatCard({ icon: Icon, label, value, sub }) {
       <p className="text-sm text-ink-muted mb-1">{label}</p>
       <p className="text-xl font-heading font-medium text-ink">{value}</p>
       {sub && <p className="text-xs text-warning mt-1">{sub}</p>}
+      {action}
     </div>
   );
 }
@@ -271,6 +309,15 @@ function Info({ label, value }) {
   return <div className="flex flex-wrap justify-between gap-2 border-b border-border pb-2 text-sm"><span className="text-ink-muted">{label}</span><span>{value || "-"}</span></div>;
 }
 
-function RecordList({ items, empty, render }) {
-  return <div className="card divide-y divide-border max-w-3xl">{items.length ? items.map((item) => <div className="py-3 text-sm" key={item._id}>{render(item)}</div>) : <p className="text-sm text-ink-muted">{empty}</p>}</div>;
+function RecordList({ items, empty, render, action }) {
+  return (
+    <div className="card divide-y divide-border max-w-3xl">
+      {items.length ? items.map((item) => (
+        <div className="py-3 text-sm flex items-center justify-between gap-3" key={item._id}>
+          <span>{render(item)}</span>
+          {action?.(item)}
+        </div>
+      )) : <p className="text-sm text-ink-muted">{empty}</p>}
+    </div>
+  );
 }

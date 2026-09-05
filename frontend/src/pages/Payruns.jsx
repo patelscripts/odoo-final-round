@@ -59,7 +59,7 @@ export default function Payruns() {
       <PageHeader
         title="Payruns"
         description="Create, compute, validate, and pay monthly payroll."
-        action={<button className="btn-primary" onClick={() => setStep(1)}>Create payrun</button>}
+        action={<button className="btn-primary cursor-pointer" onClick={() => setStep(1)}>Create payrun</button>}
       />
       <AsyncState error={error} />
       <div className="card overflow-x-auto">
@@ -88,8 +88,8 @@ export default function Payruns() {
         {!items.length && <p className="py-8 text-center text-sm text-ink-muted">No payruns found.</p>}
       </div>
       {step > 0 && (
-        <div className="fixed inset-0 bg-ink/30 z-20 flex items-end sm:items-center justify-center p-0 sm:p-5">
-          <div className="card w-full max-w-lg max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-ink/30 z-50 flex items-start sm:items-center justify-center p-4 sm:p-5">
+          <div className="card w-full max-w-lg max-h-[calc(100vh-2rem)] sm:max-h-[92vh] overflow-y-auto mt-4 sm:mt-0">
             <h2 className="text-2xl mb-5">Create payrun · Step {step} of 2</h2>
             {step === 1 ? (
               <div className="space-y-4">
@@ -116,12 +116,13 @@ export default function Payruns() {
                   ))}
                 </div>
                 <div className="flex gap-3">
-                  <button className="btn-secondary" onClick={() => setStep(1)}>Back</button>
-                  <button className="btn-primary" onClick={submit} disabled={!form.employees.length}>Create payrun</button>
+                  <button className="btn-secondary cursor-pointer
+                  " onClick={() => setStep(1)}>Back</button>
+                  <button className="btn-primary cursor-pointer" onClick={submit} disabled={!form.employees.length}>Create payrun</button>
                 </div>
               </div>
             )}
-            <button className="block mt-4 text-sm text-ink-muted" onClick={() => setStep(0)}>Cancel</button>
+            <button className=" cursor-pointer block mt-4 text-sm text-ink-muted" onClick={() => setStep(0)}>Cancel</button>
           </div>
         </div>
       )}

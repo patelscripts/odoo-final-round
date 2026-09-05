@@ -51,7 +51,7 @@ export default function SalaryStructures() {
         description="Group salary rules into active payroll structures."
         action={
           <button
-            className="btn-primary"
+            className="btn-primary cursor-pointer mr-2"
             onClick={() => {
               setEditing(null);
               setForm({ name: "", isActive: true, salaryRules: [] });
@@ -65,7 +65,7 @@ export default function SalaryStructures() {
       <AsyncState loading={loading} error={error} />
       {!loading && (
         <div className="card overflow-x-auto">
-          <table className="w-full text-left text-sm min-w-[520px]">
+          <table className="w-full text-left text-sm min-w-130">
             <thead>
               <tr className="border-b border-border">
                 <th className="pb-3">Name</th>
@@ -114,40 +114,49 @@ export default function SalaryStructures() {
         </div>
       )}
       {open && (
-        <div className="fixed inset-0 bg-ink/30 z-20 flex items-end sm:items-center justify-center p-0 sm:p-5">
-          <form className="card w-full max-w-2xl max-h-[92vh] overflow-y-auto" onSubmit={submit}>
+        <div className="fixed inset-0 bg-ink/30 z-50 flex items-start sm:items-center justify-center p-4 sm:p-5">
+          <form className="card w-full max-w-2xl max-h-[92vh] overflow-y-auto mt-4 sm:mt-0" onSubmit={submit}>
             <h2 className="text-2xl mb-5">{editing ? "Edit" : "Add"} structure</h2>
             <label className="block mb-4">
-              <span className="block text-sm font-medium mb-1.5">Name</span>
+              <span className="block text-sm font-medium mb-1.5">Structure name</span>
               <input className="input-field" value={form.name} required onChange={(e) => setForm({ ...form, name: e.target.value })} />
             </label>
-            <label className="flex items-center gap-2 mb-4">
+            <label className="flex items-center gap-2 mb-6 text-sm">
               <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
-              Active
+              <span>Active structure</span>
             </label>
-            <p className="text-sm font-medium mb-2">Salary rules</p>
-            <div className="grid sm:grid-cols-2 gap-2 mb-5">
-              {rules.map((rule) => {
-                const checked = form.salaryRules.includes(rule._id);
-                return (
-                  <label key={rule._id} className="border border-border rounded-md px-3 py-2 text-sm flex gap-2">
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() =>
-                        setForm({
-                          ...form,
-                          salaryRules: checked
-                            ? form.salaryRules.filter((id) => id !== rule._id)
-                            : [...form.salaryRules, rule._id],
-                        })
-                      }
-                    />
-                    {rule.name} ({rule.code})
-                  </label>
-                );
-              })}
-            </div>
+            <fieldset className="mb-6">
+              <legend className="text-sm font-medium mb-2">Salary rules</legend>
+              {rules.length ? (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {rules.map((rule) => {
+                    const checked = form.salaryRules.includes(rule._id);
+                    return (
+                      <label key={rule._id} className="border border-border rounded-md px-3 py-3 text-sm flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() =>
+                            setForm({
+                              ...form,
+                              salaryRules: checked
+                                ? form.salaryRules.filter((id) => id !== rule._id)
+                                : [...form.salaryRules, rule._id],
+                            })
+                          }
+                        />
+                        <span>
+                          <span className="block font-medium">{rule.name}</span>
+                          <span className="text-xs text-ink-muted">{rule.code} · {rule.category}</span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-ink-muted">No salary rules available. Create one first.</p>
+              )}
+            </fieldset>
             <div className="flex justify-end gap-3">
               <button type="button" className="btn-secondary" onClick={() => setOpen(false)}>Cancel</button>
               <button className="btn-primary">Save</button>
