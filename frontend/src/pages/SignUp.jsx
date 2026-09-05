@@ -2,17 +2,12 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Lock, ArrowRight } from "lucide-react";
 import { registerUser } from "../services/authService";
-import { useAuth } from "../hooks/useAuth";
 
 export default function Signup() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,11 +17,12 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
     try {
       const { data } = await registerUser(formData);
-      login({ name: data.name, email: data.email, role: data.role }, data.token);
-      navigate("/dashboard");
+      setSuccess(data.message || "Account created. Waiting for admin approval.");
+      setTimeout(() => navigate("/login"), 2500);
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed. Try again.");
     } finally {
@@ -53,16 +49,17 @@ export default function Signup() {
             </div>
           )}
 
+          {success && (
+            <div className="mb-5 px-4 py-3 rounded-md bg-primary-light border border-primary/30 text-sm text-primary-dark">
+              {success}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-ink mb-1.5">
-                Full name
-              </label>
+              <label className="block text-sm font-medium text-ink mb-1.5">Full name</label>
               <div className="relative">
-                <User
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted"
-                />
+                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
                 <input
                   type="text"
                   name="name"
@@ -76,14 +73,9 @@ export default function Signup() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ink mb-1.5">
-                Email
-              </label>
+              <label className="block text-sm font-medium text-ink mb-1.5">Email</label>
               <div className="relative">
-                <Mail
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted"
-                />
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
                 <input
                   type="email"
                   name="email"
@@ -97,14 +89,9 @@ export default function Signup() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ink mb-1.5">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-ink mb-1.5">Password</label>
               <div className="relative">
-                <Lock
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted"
-                />
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
                 <input
                   type="password"
                   name="password"

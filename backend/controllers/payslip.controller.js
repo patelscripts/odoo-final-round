@@ -63,3 +63,11 @@ exports.sendPayslips = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.getMyPayslips = async (req, res) => {
+  if (!req.user.employee) return res.json([]);
+  const payslips = await Payslip.find({ employee: req.user.employee })
+    .populate("payrun", "name periodStart periodEnd")
+    .sort("-periodStart");
+  res.json(payslips);
+};

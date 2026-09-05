@@ -9,6 +9,9 @@ const {
   getEmployeeContracts,
   getEmployeeAttendance,
   getEmployeeTimeOff,
+  getMyProfile,
+  getMyAttendance,
+  getMyTimeOff,
 } = require("../controllers/employee.controller");
 const { protect } = require("../middleware/auth.middleware");
 const { authorize } = require("../middleware/role.middleware");
@@ -24,5 +27,9 @@ router.delete("/:id", authorize("admin", "hr_manager"), deleteEmployee);
 router.get("/:id/contracts", getEmployeeContracts);
 router.get("/:id/attendance", getEmployeeAttendance);
 router.get("/:id/timeoff", getEmployeeTimeOff);
+
+router.get("/me/profile", getMyProfile);
+router.get("/me/attendance", getMyAttendance);
+router.get("/me/timeoff", getMyTimeOff);
 
 module.exports = router;

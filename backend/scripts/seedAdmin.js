@@ -15,7 +15,15 @@ async function run() {
 
   const existing = await User.findOne({ email: ADMIN_EMAIL });
   if (existing) {
-    console.log("Admin already exists — skipping.");
+    if (existing.role !== "admin" || !existing.isApproved) {
+      await User.updateOne(
+        { _id: existing._id },
+        { $set: { role: "admin", isApproved: true } }
+      );
+      console.log("Existing account updated as an approved admin.");
+    } else {
+      console.log("Admin already exists — skipping.");
+    }
     await mongoose.disconnect();
     return;
   }

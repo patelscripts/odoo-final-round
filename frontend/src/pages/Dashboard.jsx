@@ -19,6 +19,7 @@ export default function Dashboard() {
   const a = data?.attendanceOverview || {};
   const salaryData = data?.charts?.salaryCostByDepartment || [];
   const trendData = data?.charts?.monthlyTrend || [];
+  const headcountData = data?.headcountByDepartment || [];
 
   return (
     <>
@@ -59,6 +60,17 @@ export default function Dashboard() {
               </LineChart>
             </ChartCard>
           </div>
+          <div className="mb-5">
+            <ChartCard title="Headcount by department" empty={!headcountData.length}>
+              <BarChart data={headcountData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis dataKey="department" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="count" fill="var(--color-warning)" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ChartCard>
+          </div>
           <div className="grid gap-5 xl:grid-cols-2">
             <section className="card">
               <h2 className="text-xl mb-4">Attendance overview</h2>
@@ -97,7 +109,7 @@ function ChartCard({ title, children, empty }) {
       <h2 className="text-xl mb-4">{title}</h2>
       <div className="h-64">
         {empty ? (
-          <p className="text-sm">No chart data yet.</p>
+          <p className="text-sm">No data available for this chart yet.</p>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             {children}

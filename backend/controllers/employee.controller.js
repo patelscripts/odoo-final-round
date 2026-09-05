@@ -100,3 +100,25 @@ exports.getEmployeeTimeOff = async (req, res) => {
   const requests = await TimeOffRequest.find({ employee: req.params.id }).sort("-startDate");
   res.json(requests);
 };
+
+exports.getMyProfile = async (req, res) => {
+  if (!req.user.employee) {
+    return res.status(404).json({ message: "Your account is not linked to an employee profile yet." });
+  }
+  const employee = await Employee.findById(req.user.employee).populate("manager", "name").populate("workingSchedule");
+  res.json(employee);
+};
+
+exports.getMyAttendance = async (req, res) => {
+  if (!req.user.employee) return res.json([]);
+  const Attendance = require("../models/Attendance");
+  const records = await Attendance.find({ employee: req.user.employee }).sort("-date");
+  res.json(records);
+};
+
+exports.getMyTimeOff = async (req, res) => {
+  if (!req.user.employee) return res.json([]);
+  const TimeOffRequest = require("../models/TimeOffRequest");
+  const requests = await TimeOffRequest.find({ employee: req.user.employee }).sort("-startDate");
+  res.json(requests);
+};

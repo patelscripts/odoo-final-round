@@ -20,6 +20,8 @@ import SalaryStructures from "./pages/SalaryStructures";
 import Payruns from "./pages/Payruns";
 import PayrunDetail from "./pages/PayrunDetail";
 import Payslips from "./pages/Payslips";
+import PendingApprovals from "./pages/PendingApprovals";
+import EmployeeSelfService from "./pages/EmployeeSelfService";
 
 function GuestOnly({ children }) {
   const { token } = useAuth();
@@ -76,6 +78,12 @@ function App() {
         <Route path="/payroll/payruns" element={<Payruns />} />
         <Route path="/payroll/payruns/:id" element={<PayrunDetail />} />
         <Route path="/payroll/payslips" element={<Payslips />} />
+        <Route path="/admin/pending-approvals" element={<PendingApprovals />} />
+        <Route path="/my/dashboard" element={<EmployeeSelfService section="dashboard" />} />
+        <Route path="/my/profile" element={<EmployeeSelfService section="profile" />} />
+        <Route path="/my/attendance" element={<EmployeeSelfService section="attendance" />} />
+        <Route path="/my/timeoff" element={<EmployeeSelfService section="timeoff" />} />
+        <Route path="/my/payslips" element={<EmployeeSelfService section="payslips" />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>

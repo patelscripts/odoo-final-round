@@ -41,12 +41,15 @@ export default function ResourcePage({
   transform,
   addLabel,
   extraAction,
+  searchKeys,
+  searchPlaceholder = "Search records...",
 }) {
   const [items, setItems] = useState([]);
   const [editing, setEditing] = useState(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
   const load = () => {
     setLoading(true);
@@ -56,6 +59,12 @@ export default function ResourcePage({
       .catch((e) => setError(e.response?.data?.message || "Could not load records."))
       .finally(() => setLoading(false));
   };
+
+  const visibleItems = searchKeys
+    ? items.filter((item) =>
+        searchKeys.some((key) => String(value(item, key) || "").toLowerCase().includes(search.toLowerCase()))
+      )
+    : items;
 
   useEffect(() => {
     load();
@@ -109,6 +118,19 @@ export default function ResourcePage({
       <AsyncState loading={loading} error={error} />
       {!loading && (
         <div className="card overflow-x-auto">
+          {searchKeys && (
+            <div className="mb-5 max-w-md">
+              <label className="sr-only" htmlFor={`${title}-search`}>{searchPlaceholder}</label>
+              <input
+                id={`${title}-search`}
+                className="input-field"
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={searchPlaceholder}
+              />
+            </div>
+          )}
           <table className="w-full text-left text-sm min-w-[640px]">
             <thead>
               <tr className="border-b border-border">
@@ -121,7 +143,7 @@ export default function ResourcePage({
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {visibleItems.map((item) => (
                 <tr className="table-row" key={item._id}>
                   {columns.map((c) => (
                     <td className="py-3 pr-4" key={c.key}>
@@ -154,8 +176,10 @@ export default function ResourcePage({
               ))}
             </tbody>
           </table>
-          {!items.length && (
-            <p className="py-8 text-center text-sm text-ink-muted">No records found.</p>
+          {!visibleItems.length && (
+            <p className="py-8 text-center text-sm text-ink-muted">
+              {items.length ? "No matching records found." : "No records found."}
+            </p>
           )}
         </div>
       )}

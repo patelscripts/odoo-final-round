@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {
-  getPayslips, getPayslipById, printPayslip, sendPayslips,
+  getPayslips, getPayslipById, printPayslip, sendPayslips, getMyPayslips,
 } = require("../controllers/payslip.controller");
 const { protect } = require("../middleware/auth.middleware");
 const { authorize } = require("../middleware/role.middleware");
@@ -16,5 +16,6 @@ router.post(
   authorize("admin", "hr_payroll_user", "hr_payroll_manager"),
   sendPayslips
 );
+router.get("/me/list", getMyPayslips);
 
 module.exports = router;

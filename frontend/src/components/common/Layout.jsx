@@ -1,52 +1,48 @@
 import { useState } from "react";
-import { Menu, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { useAuth } from "../../hooks/useAuth";
+import { LogOut, Menu } from "lucide-react";
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
-  const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <Sidebar open={open} onClose={() => setOpen(false)} />
-      <div className="min-w-0 flex-1 flex flex-col">
-        <header className="h-16 border-b border-border bg-surface flex items-center justify-between px-4 sm:px-5 lg:px-8 sticky top-0 z-10">
-          <button
-            className="lg:hidden p-2 text-ink-muted"
-            onClick={() => setOpen(true)}
-            aria-label="Open menu"
-          >
-            <Menu size={20} />
-          </button>
-          <div className="ml-auto flex items-center gap-3 sm:gap-4 min-w-0">
-            <div className="text-right min-w-0">
-              <div className="text-sm font-medium truncate">{user?.name || "Team member"}</div>
-              <div className="text-xs text-ink-muted capitalize truncate">
-                {user?.role?.replaceAll("_", " ")}
-              </div>
-            </div>
-            <button
-              className="btn-secondary !p-2"
-              title="Log out"
-              onClick={() => {
-                logout();
-                navigate("/login");
-              }}
-            >
-              <LogOut size={17} />
-            </button>
-          </div>
-        </header>
-        <main className="p-4 sm:p-5 lg:p-8 w-full max-w-[1440px]">{children}</main>
-      </div>
-      {open && (
+    <div className="h-screen overflow-hidden bg-background flex flex-col">
+      <header className="h-16 shrink-0 border-b border-border flex items-center gap-3 px-4 sm:px-6 bg-surface z-40">
         <button
-          className="fixed inset-0 bg-ink/40 z-20 lg:hidden"
-          aria-label="Close menu"
-          onClick={() => setOpen(false)}
+          className="lg:hidden p-2 text-ink-muted"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open navigation"
+        >
+          <Menu size={20} />
+        </button>
+        <span className="font-heading text-lg font-semibold text-ink">
+          PeoplePay<span className="text-primary">360</span>
+        </span>
+        <div className="ml-auto flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="text-sm text-right min-w-0">
+            <p className="text-ink font-medium truncate">{user?.name}</p>
+            <p className="text-ink-muted text-xs capitalize">{user?.role?.replace(/_/g, " ")}</p>
+          </div>
+          <button
+            onClick={logout}
+            className="shrink-0 p-2 text-ink-muted hover:text-warning transition-colors"
+            aria-label="Log out"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
+      </header>
+      <div className="relative min-h-0 flex-1 flex">
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <main className="min-w-0 min-h-0 flex-1 overflow-y-auto pt-4">{children}</main>
+      </div>
+      {sidebarOpen && (
+        <button
+          className="fixed inset-x-0 top-16 bottom-0 z-20 bg-ink/40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Close navigation"
         />
       )}
     </div>

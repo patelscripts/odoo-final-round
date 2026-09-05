@@ -31,6 +31,8 @@ export default function EmployeeList() {
           Full form
         </Link>
       }
+      searchKeys={["name", "email", "department", "jobPosition", "status"]}
+      searchPlaceholder="Search employees by name, email, department..."
       transform={(data) => ({
         ...data,
         bankDetails: parseBank(data.bankDetails),

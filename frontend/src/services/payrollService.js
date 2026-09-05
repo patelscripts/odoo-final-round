@@ -10,3 +10,4 @@ export const getPayslips = (params) => api.get("/payslips", { params });
 export const getPayslip = (id) => api.get(`/payslips/${id}`);
 export const printPayslip = (id) => api.get(`/payslips/${id}/print`, { responseType: "blob" });
 export const sendPayslips = (id) => api.post(`/payslips/payrun/${id}/send`);
+export const getMyPayslips = () => api.get("/payslips/me/list");

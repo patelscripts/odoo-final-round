@@ -21,7 +21,7 @@ export default function Login() {
     setLoading(true);
     try {
       const { data } = await loginUser(formData);
-      login({ name: data.name, email: data.email, role: data.role }, data.token);
+      login({ name: data.name, email: data.email, role: data.role, employee: data.employee }, data.token);
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");
