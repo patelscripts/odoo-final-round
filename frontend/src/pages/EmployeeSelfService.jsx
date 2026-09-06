@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { getEmployee, getEmployeeAttendance, getEmployeeTimeOff } from "../services/employeeService";
 import { getPayslips, printPayslip } from "../services/payrollService";
+import { checkIn, checkOut } from "../services/attendanceService";
 import { createRequest, getTypes } from "../services/timeoffService";
 import { formatDate } from "../utils/dateHelpers";
 import formatCurrency from "../utils/formatCurrency";
@@ -28,6 +29,7 @@ export default function EmployeeSelfService({ section }) {
   const [formData, setFormData] = useState({ timeOffType: "", startDate: "", endDate: "", reason: "" });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [attendanceAction, setAttendanceAction] = useState(false);
   const details = sectionDetails[section];
 
   const loadTimeOff = () => getEmployeeTimeOff(user.employee).then((response) => setItems(response.data || []));
@@ -112,10 +114,56 @@ export default function EmployeeSelfService({ section }) {
     }
   };
 
+  const refreshDashboard = async () => {
+    const [attRes, paySlipRes] = await Promise.all([
+      getEmployeeAttendance(user.employee),
+      getPayslips({ employee: user.employee }),
+    ]);
+    setAttendance(attRes.data || []);
+    setPayslips(paySlipRes.data || []);
+  };
+
+  const handleAttendance = async () => {
+    setError("");
+    setAttendanceAction(true);
+    try {
+      if (todayAttendance?.checkIn && !todayAttendance.checkOut) await checkOut();
+      else await checkIn();
+      await refreshDashboard();
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not update attendance.");
+    } finally {
+      setAttendanceAction(false);
+    }
+  };
+
   const presentDays = attendance.filter((a) => a.status === "present").length;
   const pendingRequests = timeOff.filter((t) => t.status === "pending").length;
   const approvedRequests = timeOff.filter((t) => t.status === "approved").length;
   const latestPayslip = payslips[0];
+  const today = new Date();
+  const todayAttendance = attendance.find((record) => {
+    const recordDate = new Date(record.date);
+    return recordDate.toDateString() === today.toDateString();
+  });
+
+  useEffect(() => {
+    if (section !== "dashboard" || !user?.employee) return undefined;
+
+    const interval = window.setInterval(() => {
+      Promise.all([
+        getEmployeeAttendance(user.employee),
+        getPayslips({ employee: user.employee }),
+      ])
+        .then(([attRes, paySlipRes]) => {
+          setAttendance(attRes.data || []);
+          setPayslips(paySlipRes.data || []);
+        })
+        .catch(() => {});
+    }, 30000);
+
+    return () => window.clearInterval(interval);
+  }, [section, user?.employee]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -149,6 +197,26 @@ export default function EmployeeSelfService({ section }) {
                 </button>
               ) : null}
             />
+          </div>
+
+          <div className="card mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h3 className="text-base mb-1">Today&apos;s attendance</h3>
+              <p className="text-sm">
+                {todayAttendance?.checkIn
+                  ? `Checked in at ${new Date(todayAttendance.checkIn).toLocaleTimeString()}`
+                  : "You have not checked in yet."}
+                {todayAttendance?.checkOut && ` · Checked out at ${new Date(todayAttendance.checkOut).toLocaleTimeString()}`}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={handleAttendance}
+              disabled={attendanceAction || Boolean(todayAttendance?.checkOut)}
+            >
+              {attendanceAction ? "Updating..." : todayAttendance?.checkIn ? "Check out" : "Check in"}
+            </button>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">

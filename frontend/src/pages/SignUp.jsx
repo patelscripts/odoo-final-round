@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Lock, ArrowRight } from "lucide-react";
 import { registerUser } from "../services/authService";
+import Navbar from "../components/common/Navbar";
 
 export default function Signup() {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
@@ -31,14 +32,9 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen bg-background flex items-center justify-center px-6 pt-24 pb-12">
+      <Navbar />
       <div className="w-full max-w-md">
-        <Link to="/" className="block text-center mb-10">
-          <span className="font-heading text-3xl font-semibold text-ink tracking-tight">
-            PeoplePay<span className="text-primary">360</span>
-          </span>
-        </Link>
-
         <div className="card shadow-sm">
           <h2 className="text-2xl mb-1">Create your account</h2>
           <p className="text-sm mb-7">Set up access to your HR and payroll workspace.</p>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import { loginUser } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
+import Navbar from "../components/common/Navbar";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -22,7 +23,7 @@ export default function Login() {
     try {
       const { data } = await loginUser(formData);
       login({ name: data.name, email: data.email, role: data.role, employee: data.employee }, data.token);
-      navigate("/dashboard");
+      navigate(data.role === "employee" ? "/my/dashboard" : "/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");
     } finally {
@@ -31,15 +32,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6">
+    <div className="min-h-screen bg-background flex items-center justify-center px-6 pt-24 pb-12">
+      <Navbar />
       <div className="w-full max-w-md">
-        {/* Logo */}
-        <Link to="/" className="block text-center mb-10">
-          <span className="font-heading text-3xl font-semibold text-ink tracking-tight">
-            PeoplePay<span className="text-primary">360</span>
-          </span>
-        </Link>
-
         <div className="card shadow-sm">
           <h2 className="text-2xl mb-1 text-center">Welcome back</h2>
           <p className="text-sm mb-7 text-center">Sign in to manage your HR and payroll.</p>

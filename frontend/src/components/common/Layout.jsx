@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { useAuth } from "../../hooks/useAuth";
 import { LogOut, Menu } from "lucide-react";
@@ -17,9 +18,9 @@ export default function Layout({ children }) {
         >
           <Menu size={20} />
         </button>
-        <span className="font-heading text-lg font-semibold text-ink">
+        <Link to="/" className="font-heading text-lg font-semibold text-ink hover:text-primary transition-colors">
           PeoplePay<span className="text-primary">360</span>
-        </span>
+        </Link>
         <div className="ml-auto flex items-center gap-3 sm:gap-4 min-w-0">
           <div className="text-sm text-right min-w-0">
             <p className="text-ink font-medium truncate">{user?.name}</p>

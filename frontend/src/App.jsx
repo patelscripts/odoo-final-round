@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/SignUp";
 import Home from "./pages/Home";
@@ -24,14 +24,18 @@ import PendingApprovals from "./pages/PendingApprovals";
 import EmployeeSelfService from "./pages/EmployeeSelfService";
 
 function GuestOnly({ children }) {
-  const { token } = useAuth();
-  if (token) return <Navigate to="/dashboard" replace />;
+  const { token, user } = useAuth();
+  if (token) return <Navigate to={user?.role === "employee" ? "/my/dashboard" : "/dashboard"} replace />;
   return children;
 }
 
 function ProtectedRoute() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const location = useLocation();
   if (!token) return <Navigate to="/login" replace />;
+  if (user?.role === "employee" && !location.pathname.startsWith("/my/")) {
+    return <Navigate to="/my/dashboard" replace />;
+  }
   return (
     <Layout>
       <Outlet />

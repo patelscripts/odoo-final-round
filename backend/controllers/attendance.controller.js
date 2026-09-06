@@ -71,3 +71,67 @@ exports.deleteAttendance = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.checkIn = async (req, res) => {
+  try {
+    if (!req.user.employee) {
+      return res.status(400).json({ message: "Your account is not linked to an employee profile yet." });
+    }
+
+    const now = new Date();
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+    const existing = await Attendance.findOne({
+      employee: req.user.employee,
+      date: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    if (existing?.checkIn && !existing.checkOut) {
+      return res.status(400).json({ message: "You are already checked in." });
+    }
+    if (existing?.checkOut) {
+      return res.status(400).json({ message: "Today's attendance is already completed." });
+    }
+
+    const attendance = await Attendance.create({
+      employee: req.user.employee,
+      date: now,
+      checkIn: now,
+      status: "missing_checkout",
+    });
+    res.status(201).json(attendance);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+exports.checkOut = async (req, res) => {
+  try {
+    if (!req.user.employee) {
+      return res.status(400).json({ message: "Your account is not linked to an employee profile yet." });
+    }
+
+    const now = new Date();
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+    const attendance = await Attendance.findOne({
+      employee: req.user.employee,
+      date: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    if (!attendance?.checkIn) return res.status(400).json({ message: "Check in before checking out." });
+    if (attendance.checkOut) return res.status(400).json({ message: "You are already checked out." });
+
+    attendance.checkOut = now;
+    attendance.workedHours = calcWorkedHours(attendance.checkIn, now);
+    attendance.status = attendance.workedHours > 9 ? "overtime" : "present";
+    await attendance.save();
+    res.json(attendance);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};

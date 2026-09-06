@@ -6,12 +6,16 @@ const {
   getAttendanceById,
   updateAttendance,
   deleteAttendance,
+  checkIn,
+  checkOut,
 } = require("../controllers/attendance.controller");
 const { protect } = require("../middleware/auth.middleware");
 const { authorize } = require("../middleware/role.middleware");
 
 router.use(protect);
 
+router.post("/me/check-in", checkIn);
+router.post("/me/check-out", checkOut);
 router.post("/", createAttendance); // employee can log own attendance
 router.get("/", getAttendance);
 router.get("/:id", getAttendanceById);
